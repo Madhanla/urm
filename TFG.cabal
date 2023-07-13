@@ -49,14 +49,19 @@ extra-source-files: CHANGELOG.md
 
 library
     -- Modules exported by the library.
-    exposed-modules:  Data.PRF
-                      Data.PRF.Lang
+    exposed-modules:  Data.PRF.Lang
                       Data.PRF.Clases
                       Data.PRF.PRFExt
                       Data.PRF.Funciones
                       Data.PRF.Rapidas
                       Data.PRF.Rapidas.Funciones
-
+                      Data.URM
+                      Data.PRF.Operaciones
+                      Data.URM.PRF
+                      Data.URM.ZURM
+                      -- Data.PRF.URM
+                      -- Data.URM.Numeracion
+                      -- Data.PRF
     -- Modules included in this library but not exported.
     -- other-modules:
 
@@ -65,16 +70,18 @@ library
 
     -- Other library packages from which modules are imported.
     build-depends:  
-                      -- Only >= 0.1,
-                      base ^>=4.15.1.0,
-                      finite-typelits >= 0.1.4.2,
-                      -- ghc-prim >= 0.7.0,
-                      ghc-typelits-knownnat >= 0.7.6,
-                      ghc-typelits-natnormalise >= 0.7.6,
-                      -- red-black-record >= 2.1.4.0,
-                      -- singletons >= 3.0.1,
-                      -- type-level-sets >= 0.8.9.0,
-                      vector-sized >= 1.5.0
+                    base ^>=4.15.1.0,
+                    -- semigroupoids >= 5.3.7,
+                    vector >= 0.12.3.1,
+                    -- Only >= 0.1,
+                    finite-typelits >= 0.1.4.2,
+                    -- ghc-prim >= 0.7.0,
+                    ghc-typelits-knownnat >= 0.7.6,
+                    ghc-typelits-natnormalise >= 0.7.6,
+                    -- red-black-record >= 2.1.4.0,
+                    -- singletons >= 3.0.1,
+                    -- type-level-sets >= 0.8.9.0,
+                    vector-sized >= 1.5.0
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -116,6 +123,8 @@ test-suite TFG-test
                       ghc-typelits-knownnat >= 0.7.6,
                       ghc-typelits-natnormalise >= 0.7.6,
                       red-black-record >= 2.1.4.0,
+                      semigroupoids >= 5.3.7,
                       singletons >= 3.0.1,
                       type-level-sets >= 0.8.9.0,
+                      vector >= 0.12.3.1,
                       vector-sized >= 1.5.0

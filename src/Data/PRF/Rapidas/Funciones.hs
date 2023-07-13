@@ -45,30 +45,24 @@ import qualified Data.Vector.Sized as V
 import System.CPUTime
 
 predecesor :: PRFRapida 1
-predecesor = Subst RapMenos (vec2 (U fZero) (RapCte 1))
+predecesor = RapMenos .:. vec2 x0 (RapCte 1)
 
 sg, sgBar :: PRFRapida 1
-sg = Subst RapMenos (vec2 1 (U fZero))
+sg = RapMenos .:. vec2 1 x0
 sgBar = negate sg
 
 factorial :: PRFRapida 1
 factorial =
   Rec
     (RapCte @0 1)
-    ( Subst
-        RapPor
-        ( vec2
-            (U fOne)
-            (Subst S (vec1 $ U fZero))
-        )
-    )
+    (RapPor .:. vec2 x1 (S .:. vec1 x0))
 
 dist :: PRFRapida 2
-dist = Subst RapMas (vec2 (flipea RapMenos) RapMenos)
+dist = RapMas .:. vec2 (flipea RapMenos) RapMenos
 
 minimo, maximo :: PRFRapida 2
-minimo = Subst RapMenos (vec2 (U fZero) RapMenos)
-maximo = Subst RapMas (vec2 (U fOne) RapMenos)
+minimo = RapMenos .:. (vec2 x0 RapMenos)
+maximo = RapMas .:. (vec2 x1 RapMenos)
 
 -- | Funciones logicas
 type Predicado = PRFRapida
@@ -97,13 +91,10 @@ sumB :: forall n. KnownNat n => PRFRapida (n + 1) -> PRFRapida (n + 1)
 sumB f =
   Rec
     0
-    ( Subst
-        RapMas
-        ( vec2
-            (useArgs (V.init finites) f)
-            (U nPlus1)
-        ) ::
-        PRFRapida (n + 2)
+    ( RapMas
+        .:. vec2
+          (useArgs (V.init finites) f)
+          (U nPlus1)
     )
   where
     nPlus1 = natToFinite (Proxy @(n + 1))
@@ -114,13 +105,10 @@ prodB :: forall n. KnownNat n => PRFRapida (n + 1) -> PRFRapida (n + 1)
 prodB f =
   Rec
     1
-    ( Subst
-        RapPor
-        ( vec2
-            (useArgs (V.init finites) f)
-            (U nPlus1)
-        ) ::
-        PRFRapida (n + 2)
+    ( RapPor
+        .:. vec2
+          (useArgs (V.init finites) f)
+          (U nPlus1)
     )
   where
     nPlus1 = natToFinite (Proxy @(n + 1))
@@ -132,12 +120,10 @@ prodB f =
 muB :: forall n. KnownNat n => PRFRapida (n + 1) -> PRFRapida (n + 1)
 muB f =
   sumB
-    ( Subst
-        (prodB (signum f))
-        ( V.imap
-            (\m -> if m < n then U else (+ 1) . U)
-            (finites @(n + 1))
-        )
+    ( prodB (signum f)
+        .:. V.imap
+          (\m -> if m < n then U else (+ 1) . U)
+          (finites @(n + 1))
     )
   where
     n = natToFinite (Proxy @n)
@@ -160,12 +146,12 @@ ejemplo = do
 
   putStrLn "Lenta:"
   tl <- getCPUTime
-  print $ toPRF ej $$ (vec2 1 5000)
+  print $ toPRF ej $$ (vec2 1 500)
   tl' <- getCPUTime
   putStrLn $ "Tiempo: " ++ show (fromInteger (tl' - tl) / 1e12 :: Double)
 
   putStrLn "Rapida:"
   t <- getCPUTime
-  print $ ej $$ (vec2 1 5000)
+  print $ ej $$ (vec2 1 500)
   t' <- getCPUTime
   putStrLn $ "Tiempo: " ++ show (fromInteger (t' - t) / 1e12 :: Double)

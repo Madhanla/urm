@@ -19,7 +19,7 @@ module Data.PRF.PRFExt
 
     -- * Tipo para las Funciones Primitivas Parciales (PRFs), y
     --   funciones para evaluarlas
-    PRFExt (..), PRF,
+    PRFExt (..), PRF, EmptyExt,
     Evaluable (..),
     evalPRF, ($$),
 
@@ -27,6 +27,8 @@ module Data.PRF.PRFExt
     ident, cte0,
     useArgs, flipea,
     bott,
+    x0, x1, x2, x3,
+    (.:.),
 
     -- * Funciones utiles para trabajar con vectores y finitos
     fZero, fOne, fTwo, fThree,
@@ -222,6 +224,22 @@ vec3 x y z = V.fromTuple (x, y, z)
 vec4 :: a -> a -> a -> a -> Vector 4 a
 vec4 x y z w = V.fromTuple (x, y, z, w)
 
+-- Falsas variables
+x0 :: forall ext n. (KnownNat n, 1 <= n) => PRFExt ext n
+x0 = U fZero
+x1 :: forall ext n. (KnownNat n, 2 <= n) => PRFExt ext n
+x1 = U fOne
+x2 :: forall ext n. (KnownNat n, 3 <= n) => PRFExt ext n
+x2 = U fTwo
+x3 :: forall ext n. (KnownNat n, 4 <= n) => PRFExt ext n
+x3 = U fThree
+
+-- Sustitución con símbolo
+infixl 4 .:.
+(.:.) :: forall ext m n. (KnownNat m, KnownNat n) =>
+    PRFExt ext m -> Vector m (PRFExt ext n) -> PRFExt ext n
+(.:.) = Subst
+
 -- Vector con todos los finitos
 finites :: KnownNat n => Vector n (Finite n)
 finites = V.generate id
@@ -229,7 +247,7 @@ finites = V.generate id
 -- Just v -> v
 -- Nothing -> error "Error en la implementacion de `finites'"
 
--- Instancias
+-- | Instancias
 instance HFunctor PRFExt where
   type Par PRFExt n = KnownNat n
   hmap f = hbind (hreturn . f)  -- Por defecto

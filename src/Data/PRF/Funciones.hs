@@ -10,10 +10,10 @@ module Data.PRF.Funciones
     mas,
     menos,
     por,
-    coc,
-    res,
-    cocF,
-    resF,
+    quot',
+    rem',
+    -- quot'F,
+    -- rem'F,
 
     -- * Proposiciones
     sg,
@@ -34,117 +34,96 @@ where
 
 import Data.PRF.PRFExt
 
+-- | Definición de NumLentoPRF, que hace que se puedan sumar y restar
+-- funciones
+
 newtype NumLentoPRF ext n = NL {unNL :: PRFExt ext n}
+
+-- | Funciones básicas
 
 -- Version lenta de Cte
 cte :: forall ext n. KnownNat n => Natural -> PRFExt ext n
 cte 0 = cte0
-cte n = Subst S (vec1 . cte $ n - 1)
+cte n = S .:. (vec1 . cte) (n - 1)
 
 -- Version lenta de Mas
 mas :: PRFExt ext 2
 mas =
-  Rec (U fZero) $
-    useArgs (vec1 fTwo) S
+  Rec x0 (S .:. vec1 x2)
 
 -- Version lenta de Por
 por :: PRFExt ext 2
 por =
-  Rec cte0 $
-    useArgs
-      (vec2 fTwo fZero)
-      mas
+  Rec cte0 (mas .:. vec2 x2 x0)
 
 -- Version lenta de Menos
 menos :: PRFExt ext 2
 menos =
-  Rec (U fZero) $
-    useArgs
-      (vec1 fTwo)
-      prd
+  Rec x0 (prd .:. vec1 x2)
 
--- Predecesores
+-- Predecesorem'
 
 prd :: PRFExt ext 1
-prd = Rec Z $ (U fZero)
+prd = Rec Z x0
 
--- Minimos: Los pondre en un modulo aparte
+-- Minimos: Los pondre en un modulo aparte (?)
 minimo :: PRFExt ext 2
-minimo =
-  Subst menos $
-    vec2
-      (U fZero)
-      (Subst menos $ vec2 (U fZero) (U fOne))
+minimo = menos .:. vec2 x0 (menos .:. vec2 x0 x1)
 
 -- Maximos
 maximo :: PRFExt ext 2
-maximo =
-  Subst mas $
-    vec2
-      (U fZero)
-      (Subst menos $ vec2 (U fOne) (U fZero))
+maximo = mas .:. vec2 x0 (menos .:. vec2 x1 x0)
 
 -- Version lenta de Sg
 sg :: PRFExt ext 1
-sg = Rec cte0 $ cte 1
+sg = Rec cte0 (cte 1)
 
 -- Sgbarra (negacion de sg)
 sgbarra :: PRFExt ext 1
-sgbarra = Subst menos $ vec2 (cte 1) sg
+sgbarra = menos .:. vec2 (cte 1) sg
 
--- Distancia
+-- Distancia (valor absoluto de la diferencia)
 dist :: PRFExt ext 2
-dist =
-  Subst mas $
-    vec2
-      (useArgs (vec2 fZero fOne) menos)
-      (useArgs (vec2 fOne fZero) menos)
+dist = mas .:. vec2 (menos .:. vec2 x0 x1) (menos .:. vec2 x1 x0)
 
 -- desigualdad
 desigualdad :: PRFExt ext 2
-desigualdad = Subst sg $ vec1 $ useArgs (vec2 fZero fOne) dist
+desigualdad = sg .:. vec1 (dist .:. vec2 x0 x1)
 
 -- igualdad
 igualdad :: PRFExt ext 2
-igualdad = Subst menos $ vec2 (cte 1) desigualdad
+igualdad = sgbarra .:. vec1 desigualdad
 
--- Version lenta de Coc
-cocF, coc :: PRFExt ext 2
-cocF =
+-- Version lenta de Quot'
+-- quot' = flipea quot'
+quot' :: PRFExt ext 2
+quot' =
   Rec cte0 $
-    Subst mas $
-      vec2
-        (U fTwo)
-        ( Subst igualdad $
-            vec2
-              (U fZero)
-              (Subst S $ vec1 $ useArgs (vec2 fZero fOne) resF)
-        )
-coc = flipea cocF
-
--- Version lenta de Res (F significa argumentos flipeados)
-resF, res :: PRFExt ext 2
-resF =
-  Rec cte0 $
-    Subst por $
-      vec2
-        rm
-        (Subst desigualdad (vec2 (U fZero) rm))
+    mas .:. vec2 x2 (igualdad .:. vec2 x0 anterior)
   where
-    rm = useArgs (vec1 fTwo) S
-res = flipea resF
+    anterior = S .:. vec1 (rem' .:. vec2 x0 x1)
 
+-- Version lenta de Rem' (F significa argumentos flipeados)
+-- rem' = flipea rem'
+rem' :: PRFExt ext 2
+rem' =
+  Rec cte0 $
+    por .:. vec2 anterior (desigualdad .:. vec2 x0 anterior)
+  where
+    anterior = S .:. vec1 x2
+
+-- | Instancia
 instance KnownNat n => Num (NumLentoPRF ext n) where
   fromInteger = NL . cte . fromIntegral
-  NL f + NL g = NL . Subst mas $ vec2 f g
-  NL f * NL g = NL . Subst por $ vec2 f g
+  NL f + NL g = NL (mas .:. vec2 f g)
+  NL f * NL g = NL (por .:. vec2 f g)
   abs = id -- los naturales son positivos
 
   -- Las diferencias negativas se hacen 0
-  NL f - NL g = NL . Subst menos $ vec2 f g
+  NL f - NL g = NL (menos .:. vec2 f g)
 
   -- Negar se hace entendiendo 1 como Verdadero, 0 como Falso
-  negate f = 1 - f
+  negate (NL f) = NL (sgbarra .:. vec1 f)
 
   -- Signum es Sg
-  signum (NL f) = NL . Subst sg $ vec1 f
+  signum (NL f) = NL (sg .:. vec1 f)

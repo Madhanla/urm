@@ -19,7 +19,8 @@ Para instalarla hay que intentar con `cabal build`.
 5. `Data.URM.PRF` -- Aquí se muestra un método para obtener la URM que
    computa una función parcial recursiva dada. 
 
-   ____________________________________________ Otros módulos son de
+   ___
+   Otros módulos son de
    menos interés en lo que respecta al trabajo. Por ejemplo, los
    módulos `Data.PRF.Rapidas` y `Data.PRF.Rapidas.Funciones` son un
    intento de mejorar la eficiencia de las funciones recursivas

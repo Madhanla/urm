@@ -32,7 +32,6 @@ module Data.URM
 where
 
 import GHC.Natural (Natural ())
-import Data.PRF ()
 import qualified Data.Vector as V
 import Data.Vector
   ( Vector (),

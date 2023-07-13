@@ -8,6 +8,9 @@ module Data.URM.ZURM
     -- |                              -- negativos
     -- | computaFunc exampleBethInverse [6] -- Comprueba que son
     -- | computaFunc exampleBethInverse [3] -- inversas
+    -- |
+    -- | La URM que implementé aquí está basada en el Ejercicio 3-6.3
+    -- | de Compuability - Cutland
 
     -- Tipos de una ZURM
     Orden, Prog,
